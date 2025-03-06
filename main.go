@@ -2,26 +2,44 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
 
 	"github.com/mogumogu934/blog_aggregator/internal/config"
 )
 
 func main() {
-	cfg, err := config.Read()
+	appConfig, err := config.Read()
 	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+		fmt.Printf("error reading config: %v", err)
+		os.Exit(1)
 	}
 
-	err = cfg.SetUser("mogumogu934")
-	if err != nil {
-		log.Fatalf("error setting user: %v", err)
+	appState := state{
+		config: &appConfig,
 	}
 
-	cfg, err = config.Read()
-	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+	commandRegistry := commands{
+		handlers: make(map[string]func(*state, command) error),
 	}
 
-	fmt.Println(cfg)
+	commandRegistry.register("login", handlerLogin)
+
+	if len(os.Args) < 2 {
+		fmt.Println("error: not enough arguments provided")
+		os.Exit(1)
+	}
+
+	commandName := os.Args[1]
+	commandArgs := os.Args[2:]
+
+	cmd := command{
+		name: commandName,
+		args: commandArgs,
+	}
+
+	err = commandRegistry.run(&appState, cmd)
+	if err != nil {
+		fmt.Println("error:", err)
+		os.Exit(1)
+	}
 }
