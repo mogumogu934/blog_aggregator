@@ -29,7 +29,7 @@ type commands struct {
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
-		return fmt.Errorf("usage: login <username>")
+		return errors.New("usage: login <username>")
 	}
 
 	username := cmd.args[0]
@@ -129,6 +129,49 @@ func handlerAgg(s *state, cmd command) error {
 		os.Exit(1)
 	}
 	fmt.Println(feed)
+
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		return errors.New("usage: addfeed <name> <url>")
+	}
+
+	ctx := context.Background()
+
+	currentUser, err := s.db.GetUser(ctx, s.config.CurrentUserName)
+	if err != nil {
+		fmt.Printf("error getting current user: %v", err)
+		os.Exit(1)
+	}
+
+	name := cmd.args[0]
+	url := cmd.args[1]
+
+	params := database.AddFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      name,
+		Url:       url,
+		UserID:    currentUser.ID,
+	}
+
+	feed, err := s.db.AddFeed(ctx, params)
+	if err != nil {
+		fmt.Printf("error creating feed: %v: %v\n", params, feed)
+		os.Exit(1)
+	}
+
+	fmt.Println("Feed created successfully")
+	fmt.Println("Feed details:")
+	fmt.Printf("  ID: %s\n", feed.ID)
+	fmt.Printf("  Created At: %s\n", feed.CreatedAt)
+	fmt.Printf("  Updated At: %s\n", feed.UpdatedAt)
+	fmt.Printf("  Name: %s\n", feed.Name)
+	fmt.Printf("  URL: %s\n", feed.Url)
+	fmt.Printf("  User ID: %s\n", feed.UserID)
 
 	return nil
 }
