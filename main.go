@@ -4,11 +4,18 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/mogumogu934/blog_aggregator/internal/config"
 	"github.com/mogumogu934/blog_aggregator/internal/database"
 )
+
+var client *Client
+
+func init() {
+	client = NewClient(5 * time.Second)
+}
 
 func main() {
 	appConfig, err := config.Read()
@@ -39,6 +46,7 @@ func main() {
 	commandRegistry.register("register", handlerRegister)
 	commandRegistry.register("users", handlerUsers)
 	commandRegistry.register("reset", handlerReset)
+	commandRegistry.register("agg", handlerAgg)
 
 	if len(os.Args) < 2 {
 		fmt.Println("error: not enough arguments provided")

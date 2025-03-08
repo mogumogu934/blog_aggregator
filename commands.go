@@ -120,6 +120,19 @@ func handlerReset(s *state, cmd command) error {
 	return nil
 }
 
+func handlerAgg(s *state, cmd command) error {
+	ctx := context.Background()
+	feedURL := "https://www.wagslane.dev/index.xml"
+	feed, err := fetchFeed(ctx, feedURL)
+	if err != nil {
+		fmt.Printf("error fetching feed: %v", err)
+		os.Exit(1)
+	}
+	fmt.Println(feed)
+
+	return nil
+}
+
 func (c *commands) register(name string, f func(*state, command) error) {
 	c.handlers[name] = f
 }
