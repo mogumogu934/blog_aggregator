@@ -82,12 +82,22 @@ func handlerRegister(s *state, cmd command) error {
 
 	s.config.SetUser(username)
 	fmt.Println("User created successfully")
-	fmt.Println("user details:")
+	fmt.Println("User details:")
 	fmt.Printf("  ID: %s\n", user.ID)
 	fmt.Printf("  Name: %s\n", user.Name)
 	fmt.Printf("  Created At: %s\n", user.CreatedAt)
 	fmt.Printf("  Updated At: %s\n", user.UpdatedAt)
 
+	return nil
+}
+
+func handlerReset(s *state, cmd command) error {
+	ctx := context.Background()
+	if err := s.db.DeleteAllUsers(ctx); err != nil {
+		fmt.Printf("error resetting database")
+		os.Exit(1)
+	}
+	fmt.Println("Database reset successfully")
 	return nil
 }
 
