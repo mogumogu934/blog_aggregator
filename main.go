@@ -48,6 +48,7 @@ func main() {
 	commandRegistry.register("reset", handlerReset)
 	commandRegistry.register("agg", handlerAgg)
 	commandRegistry.register("addfeed", handlerAddFeed)
+	commandRegistry.register("feeds", handlerFeeds)
 
 	if len(os.Args) < 2 {
 		fmt.Println("error: not enough arguments provided")

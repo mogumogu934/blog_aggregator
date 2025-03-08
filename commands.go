@@ -95,7 +95,7 @@ func handlerUsers(s *state, cmd command) error {
 	ctx := context.Background()
 	users, err := s.db.GetUsers(ctx)
 	if err != nil {
-		fmt.Printf("error getting users: %v", err)
+		fmt.Printf("error getting users: %v\n", err)
 	}
 
 	for _, user := range users {
@@ -172,6 +172,27 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Printf("  Name: %s\n", feed.Name)
 	fmt.Printf("  URL: %s\n", feed.Url)
 	fmt.Printf("  User ID: %s\n", feed.UserID)
+
+	return nil
+}
+
+func handlerFeeds(s *state, cmd command) error {
+	ctx := context.Background()
+	feeds, err := s.db.GetFeeds(ctx)
+	if err != nil {
+		fmt.Printf("error getting feeds: %v", err)
+	}
+
+	for _, feed := range feeds {
+		creatorName, err := s.db.GetUserNameFromID(ctx, feed.UserID)
+		if err != nil {
+			fmt.Printf("error getting creator name from ID %s: %v\n", feed.UserID, err)
+		}
+
+		fmt.Printf("Feed: %s\n", feed.Name)
+		fmt.Printf("  URL: %s\n", feed.Url)
+		fmt.Printf("  Creator: %s\n", creatorName)
+	}
 
 	return nil
 }
