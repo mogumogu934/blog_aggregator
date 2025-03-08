@@ -76,7 +76,7 @@ func handlerRegister(s *state, cmd command) error {
 
 	user, err := s.db.CreateUser(ctx, params)
 	if err != nil {
-		fmt.Printf("error creating user: %v\n", params)
+		fmt.Printf("error creating user: %v: %v\n", params, err)
 		os.Exit(1)
 	}
 
@@ -91,13 +91,32 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
+func handlerUsers(s *state, cmd command) error {
+	ctx := context.Background()
+	users, err := s.db.GetUsers(ctx)
+	if err != nil {
+		fmt.Printf("error getting users: %v", err)
+	}
+
+	for _, user := range users {
+		if user == s.config.CurrentUserName {
+			fmt.Printf("* %s (current)\n", user)
+		} else {
+			fmt.Printf("* %s\n", user)
+		}
+	}
+
+	return nil
+}
+
 func handlerReset(s *state, cmd command) error {
 	ctx := context.Background()
 	if err := s.db.DeleteAllUsers(ctx); err != nil {
-		fmt.Printf("error resetting database")
+		fmt.Printf("error resetting database: %v", err)
 		os.Exit(1)
 	}
 	fmt.Println("Database reset successfully")
+
 	return nil
 }
 
