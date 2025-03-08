@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
+	_ "github.com/lib/pq"
 	"github.com/mogumogu934/blog_aggregator/internal/config"
+	"github.com/mogumogu934/blog_aggregator/internal/database"
 )
 
 func main() {
@@ -14,7 +17,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	dbURL := appConfig.DbURL
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		fmt.Println("error:", err)
+		os.Exit(1)
+	}
+
+	dbQueries := database.New(db)
+
 	appState := state{
+		db:     dbQueries,
 		config: &appConfig,
 	}
 
@@ -23,6 +36,7 @@ func main() {
 	}
 
 	commandRegistry.register("login", handlerLogin)
+	commandRegistry.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		fmt.Println("error: not enough arguments provided")
@@ -37,8 +51,7 @@ func main() {
 		args: commandArgs,
 	}
 
-	err = commandRegistry.run(&appState, cmd)
-	if err != nil {
+	if err = commandRegistry.run(&appState, cmd); err != nil {
 		fmt.Println("error:", err)
 		os.Exit(1)
 	}
