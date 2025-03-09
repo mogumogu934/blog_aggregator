@@ -1,9 +1,15 @@
-package main
+package fetch
 
 import (
 	"net/http"
 	"time"
 )
+
+var client *Client
+
+func init() {
+	client = NewClient(5 * time.Second)
+}
 
 type Client struct {
 	httpClient http.Client
