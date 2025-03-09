@@ -10,5 +10,11 @@ VALUES (
 )
 RETURNING *;
 
+-- name: GetFeedIDAndNameFromURL :one
+SELECT id, name
+FROM feeds
+WHERE url = $1;
+
 -- name: GetFeeds :many
-SELECT name, url, user_id FROM feeds;
+SELECT name, url, user_id
+FROM feeds;
