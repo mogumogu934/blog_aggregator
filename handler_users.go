@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
@@ -16,7 +17,18 @@ func handlerLogin(s *state, cmd command) error {
 		return errors.New("usage: login <username>")
 	}
 
+	ctx := context.Background()
 	username := cmd.args[0]
+
+	_, err := s.db.GetUser(ctx, username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			fmt.Printf("error: user with name %s does not exist\n", username)
+			os.Exit(1)
+		}
+		fmt.Printf("error checking if user with name %s already exists: %v\n", username, err)
+		os.Exit(1)
+	}
 
 	s.config.SetUser(username)
 	fmt.Printf("user set to %s\n", username)
@@ -29,15 +41,24 @@ func handlerRegister(s *state, cmd command) error {
 		return errors.New("usage: register <name>")
 	}
 
+	ctx := context.Background()
 	username := cmd.args[0]
+
+	_, err := s.db.GetUser(ctx, username)
+	if err == nil {
+		fmt.Printf("error: user with name %s already exists\n", username)
+		os.Exit(1)
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		fmt.Printf("error checking if user with name %s already exists: %v\n", username, err)
+		os.Exit(1)
+	}
+
 	params := database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name:      username,
 	}
-
-	ctx := context.Background()
 
 	newUser, err := s.db.CreateUser(ctx, params)
 	if err != nil {
@@ -78,7 +99,7 @@ func handlerUsers(s *state, cmd command) error {
 func handlerReset(s *state, cmd command) error {
 	ctx := context.Background()
 	if err := s.db.DeleteAllUsers(ctx); err != nil {
-		fmt.Printf("error resetting database: %v", err)
+		fmt.Printf("error resetting database: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println("Database reset successfully")

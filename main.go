@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
 	"github.com/mogumogu934/blog_aggregator/internal/config"
@@ -13,14 +14,14 @@ import (
 func main() {
 	appConfig, err := config.Read()
 	if err != nil {
-		fmt.Printf("error reading config: %v", err)
+		fmt.Printf("error reading config: %v\n", err)
 		os.Exit(1)
 	}
 
 	dbURL := appConfig.DbURL
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Printf("error: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -44,13 +45,14 @@ func main() {
 	commandRegistry.register("feeds", handlerFeeds)
 	commandRegistry.register("follow", middlewareLoggedIn(handlerFollow))
 	commandRegistry.register("following", middlewareLoggedIn(handlerFollowing))
+	commandRegistry.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 
 	if len(os.Args) < 2 {
 		fmt.Println("error: not enough arguments provided")
 		os.Exit(1)
 	}
 
-	commandName := os.Args[1]
+	commandName := strings.ToLower(os.Args[1])
 	commandArgs := os.Args[2:]
 
 	cmd := command{
@@ -59,7 +61,7 @@ func main() {
 	}
 
 	if err = commandRegistry.run(&appState, cmd); err != nil {
-		fmt.Println("error:", err)
+		fmt.Printf("error: %v\n", err)
 		os.Exit(1)
 	}
 }
