@@ -16,7 +16,7 @@ curl -sS https://webi.sh/golang | sh
 
 Install the blog_aggregator CLI
 ```
-go install github.com/mogumogu934/gator@latest
+go install github.com/mogumogu934/blog_aggregator@latest
 ```
 
 Before running the blog_aggregator CLI, the config file must be set up.
@@ -37,7 +37,7 @@ password: Your PostgreSQL password
 hostname: Where your PostgreSQL server is running (usually "localhost")
 port: The port PostgreSQL is running on (default is 5432)
 database_name: The name of your database (e.g., "gator")
-current_user_name: Your preferred username for Gator
+current_user_name: Your preferred username for the blog_aggregator
 ```
 
 Example:
