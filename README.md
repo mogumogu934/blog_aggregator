@@ -60,7 +60,7 @@ go install
 
 Start the CLI:
 ```
-./blog_aggregator"
+./blog_aggregator
 ```
 
 Here is a list of available commands:
