@@ -23,10 +23,12 @@ go install github.com/your-username/gator@latest
 Before running the blog_aggregator CLI, the config file must be set up.
 Create a file named ".gatorconfig.json" in your home directory with the following structure:
 
+```
 {
 "db_url":"postgres://username:password@hostname:port/database_name?sslmode=disable",
 "current_user_name":"your username"
 }
+```
 
 Replace the values with your actual information:
 ```
