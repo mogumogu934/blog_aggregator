@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,10 +18,9 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	ctx := context.Background()
 	url := cmd.args[0]
 
-	feedInfo, err := s.db.GetFeedIDAndNameFromURL(ctx, url)
+	feedInfo, err := s.db.GetFeedFromURL(ctx, url)
 	if err != nil {
-		fmt.Printf("error getting feed ID and name from URL %s: %v\n", url, err)
-		os.Exit(1)
+		return fmt.Errorf("error getting feed ID and name from URL %s: %v", url, err)
 	}
 
 	params := database.CreateFeedFollowParams{
@@ -35,8 +33,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 
 	_, err = s.db.CreateFeedFollow(ctx, params)
 	if err != nil {
-		fmt.Printf("error following feed %s: %v\n", url, err)
-		os.Exit(1)
+		return fmt.Errorf("error following feed %s: %v", url, err)
 	}
 
 	fmt.Println("Feed followed successfully")
@@ -51,8 +48,11 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 
 	follows, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {
-		fmt.Printf("error getting feed follows for current user %s: %v\n", user.Name, err)
-		os.Exit(1)
+		return fmt.Errorf("error getting feed follows for current user %s: %v", user.Name, err)
+	}
+
+	if len(follows) == 0 {
+		return errors.New("you have yet to follow any feeds")
 	}
 
 	for _, follow := range follows {
@@ -68,17 +68,20 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	}
 
 	url := cmd.args[0]
+	ctx := context.Background()
+
+	feed, err := s.db.GetFeedFromURL(ctx, url)
+	if err != nil {
+		return fmt.Errorf("error getting feed: %w", err)
+	}
 
 	params := database.DeleteFeedFollowParams{
 		UserID: user.ID,
-		Url:    url,
+		FeedID: feed.ID,
 	}
-
-	ctx := context.Background()
 
 	if err := s.db.DeleteFeedFollow(ctx, params); err != nil {
 		fmt.Println("error deleting feed follow record:", err)
-		os.Exit(1)
 	}
 
 	return nil
