@@ -1,5 +1,4 @@
 # blog_aggregator
-Course #17: Build a Blog Aggregator
 
 Required:
 
@@ -17,7 +16,7 @@ curl -sS https://webi.sh/golang | sh
 
 Install the blog_aggregator CLI
 ```
-go install github.com/your-username/gator@latest
+go install github.com/mogumogu934/gator@latest
 ```
 
 Before running the blog_aggregator CLI, the config file must be set up.
