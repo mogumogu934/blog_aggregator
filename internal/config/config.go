@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -16,7 +17,7 @@ type Config struct {
 func getConfigFilePath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error getting home directory: %w", err)
 	}
 
 	return filepath.Join(homeDir, configFileName), nil
@@ -25,18 +26,18 @@ func getConfigFilePath() (string, error) {
 func Read() (Config, error) {
 	configFilePath, err := getConfigFilePath()
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("error getting config file path: %w", err)
 	}
 
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("error reading config file: %w", err)
 	}
 
 	var cfg Config
 	err = json.Unmarshal(data, &cfg)
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("error unmarshaling json data: %w", err)
 	}
 
 	return cfg, nil
@@ -45,12 +46,12 @@ func Read() (Config, error) {
 func write(data []byte) error {
 	configFilePath, err := getConfigFilePath()
 	if err != nil {
-		return err
+		return fmt.Errorf("error getting config file path: %w", err)
 	}
 
 	err = os.WriteFile(configFilePath, data, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("error writing to config file: %w", err)
 	}
 
 	return nil
@@ -60,12 +61,12 @@ func (cfg *Config) SetUser(username string) error {
 	cfg.CurrentUserName = username
 	data, err := json.Marshal(cfg)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshaling config: %w", err)
 	}
 
 	err = write(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("error writing user %s to config file: %w", username, err)
 	}
 
 	return nil

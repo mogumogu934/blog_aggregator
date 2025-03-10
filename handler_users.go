@@ -31,7 +31,7 @@ func handlerLogin(s *state, cmd command) error {
 	}
 
 	s.config.SetUser(username)
-	fmt.Printf("user set to %s\n", username)
+	fmt.Printf("Current user set to %s\n", username)
 
 	return nil
 }
@@ -62,12 +62,13 @@ func handlerRegister(s *state, cmd command) error {
 
 	newUser, err := s.db.CreateUser(ctx, params)
 	if err != nil {
-		fmt.Printf("error creating user: %s, %v\n", username, err)
+		fmt.Printf("error creating user %s: %v\n", username, err)
 		os.Exit(1)
 	}
 
 	s.config.SetUser(username)
 	fmt.Println("User created successfully")
+	fmt.Printf("Current user set to %s\n", username)
 	fmt.Println("User details:")
 	fmt.Printf("  ID: %s\n", newUser.ID)
 	fmt.Printf("  Name: %s\n", newUser.Name)
@@ -81,7 +82,7 @@ func handlerUsers(s *state, cmd command) error {
 	ctx := context.Background()
 	users, err := s.db.GetUsers(ctx)
 	if err != nil {
-		fmt.Printf("error getting users: %v\n", err)
+		fmt.Println("error getting users:", err)
 		os.Exit(1)
 	}
 
@@ -99,7 +100,7 @@ func handlerUsers(s *state, cmd command) error {
 func handlerReset(s *state, cmd command) error {
 	ctx := context.Background()
 	if err := s.db.DeleteAllUsers(ctx); err != nil {
-		fmt.Printf("error resetting database: %v\n", err)
+		fmt.Println("error resetting database:", err)
 		os.Exit(1)
 	}
 	fmt.Println("Database reset successfully")

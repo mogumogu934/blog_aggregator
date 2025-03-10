@@ -17,7 +17,7 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 			if errors.Is(err, sql.ErrNoRows) {
 				fmt.Printf("error: user with name %s does not exist", s.config.CurrentUserName)
 			}
-			return fmt.Errorf("error checking if user exists: %w", err)
+			return fmt.Errorf("error checking if current user %s exists: %w", s.config.CurrentUserName, err)
 		}
 		return handler(s, cmd, currentUser)
 	}
