@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 )
 
@@ -14,8 +13,7 @@ func handlerAgg(s *state, cmd command) error {
 
 	timeBetweenRequests, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
-		fmt.Println("error parsing time string to time duration value:", err)
-		os.Exit(1)
+		return fmt.Errorf("error parsing time string to time duration value: %w", err)
 	}
 
 	fmt.Printf("Collecting feeds every %v\n", timeBetweenRequests)

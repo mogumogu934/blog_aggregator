@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,11 +22,9 @@ func handlerLogin(s *state, cmd command) error {
 	_, err := s.db.GetUser(ctx, username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			fmt.Printf("error: user with name %s does not exist\n", username)
-			os.Exit(1)
+			return fmt.Errorf("error: user with name %s does not exist", username)
 		}
-		fmt.Printf("error checking if user with name %s already exists: %v\n", username, err)
-		os.Exit(1)
+		return fmt.Errorf("error checking if user with name %s already exists: %w", username, err)
 	}
 
 	s.config.SetUser(username)
@@ -46,11 +43,9 @@ func handlerRegister(s *state, cmd command) error {
 
 	_, err := s.db.GetUser(ctx, username)
 	if err == nil {
-		fmt.Printf("error: user with name %s already exists\n", username)
-		os.Exit(1)
+		return fmt.Errorf("error: user with name %s already exists", username)
 	} else if !errors.Is(err, sql.ErrNoRows) {
-		fmt.Printf("error checking if user with name %s already exists: %v\n", username, err)
-		os.Exit(1)
+		return fmt.Errorf("error checking if user with name %s already exists: %w", username, err)
 	}
 
 	params := database.CreateUserParams{
@@ -62,8 +57,7 @@ func handlerRegister(s *state, cmd command) error {
 
 	newUser, err := s.db.CreateUser(ctx, params)
 	if err != nil {
-		fmt.Printf("error creating user %s: %v\n", username, err)
-		os.Exit(1)
+		return fmt.Errorf("error creating user %s: %w", username, err)
 	}
 
 	s.config.SetUser(username)
@@ -82,8 +76,7 @@ func handlerUsers(s *state, cmd command) error {
 	ctx := context.Background()
 	users, err := s.db.GetUsers(ctx)
 	if err != nil {
-		fmt.Println("error getting users:", err)
-		os.Exit(1)
+		return fmt.Errorf("error getting users: %w", err)
 	}
 
 	for _, user := range users {
@@ -100,8 +93,7 @@ func handlerUsers(s *state, cmd command) error {
 func handlerReset(s *state, cmd command) error {
 	ctx := context.Background()
 	if err := s.db.DeleteAllUsers(ctx); err != nil {
-		fmt.Println("error resetting database:", err)
-		os.Exit(1)
+		return fmt.Errorf("error resetting database: %w", err)
 	}
 	fmt.Println("Database reset successfully")
 

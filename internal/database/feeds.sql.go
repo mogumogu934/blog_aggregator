@@ -60,21 +60,24 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 	return i, err
 }
 
-const getFeedIDAndNameFromURL = `-- name: GetFeedIDAndNameFromURL :one
-SELECT id, name
+const getFeedFromURL = `-- name: GetFeedFromURL :one
+SELECT id, created_at, updated_at, last_fetched_at, name, url, user_id
 FROM feeds
 WHERE url = $1
 `
 
-type GetFeedIDAndNameFromURLRow struct {
-	ID   uuid.UUID
-	Name string
-}
-
-func (q *Queries) GetFeedIDAndNameFromURL(ctx context.Context, url string) (GetFeedIDAndNameFromURLRow, error) {
-	row := q.db.QueryRowContext(ctx, getFeedIDAndNameFromURL, url)
-	var i GetFeedIDAndNameFromURLRow
-	err := row.Scan(&i.ID, &i.Name)
+func (q *Queries) GetFeedFromURL(ctx context.Context, url string) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getFeedFromURL, url)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.LastFetchedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+	)
 	return i, err
 }
 

@@ -14,14 +14,14 @@ import (
 func main() {
 	appConfig, err := config.Read()
 	if err != nil {
-		fmt.Printf("error reading config: %v\n", err)
+		fmt.Println("error reading config:", err)
 		os.Exit(1)
 	}
 
 	dbURL := appConfig.DbURL
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
+		fmt.Println("error opening database:", err)
 		os.Exit(1)
 	}
 
@@ -50,7 +50,6 @@ func main() {
 
 	if len(os.Args) < 2 {
 		fmt.Println("error: not enough arguments provided")
-		os.Exit(1)
 	}
 
 	commandName := strings.ToLower(os.Args[1])
@@ -62,7 +61,7 @@ func main() {
 	}
 
 	if err = commandRegistry.run(&appState, cmd); err != nil {
-		fmt.Printf("error: %v\n", err)
+		fmt.Println("error running command:", err)
 		os.Exit(1)
 	}
 }

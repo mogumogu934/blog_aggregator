@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"time"
 
@@ -40,8 +39,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 	feed, err := s.db.AddFeed(ctx, addFeedParams)
 	if err != nil {
-		fmt.Println("error creating feed:", err)
-		os.Exit(1)
+		return fmt.Errorf("error creating feed: %w", err)
 	}
 
 	fmt.Println("Feed created successfully")
@@ -63,8 +61,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 	_, err = s.db.CreateFeedFollow(ctx, feedFollowParams)
 	if err != nil {
-		fmt.Println("error creating feed follow record:", err)
-		os.Exit(1)
+		return fmt.Errorf("error creating feed follow record: %w", err)
 	}
 
 	return nil
@@ -75,8 +72,11 @@ func handlerFeeds(s *state, cmd command) error {
 
 	feeds, err := s.db.GetFeeds(ctx)
 	if err != nil {
-		fmt.Println("error getting feeds:", err)
-		os.Exit(1)
+		return fmt.Errorf("error getting feeds: %w", err)
+	}
+
+	if len(feeds) == 0 {
+		return errors.New("you have yet to add any feeds")
 	}
 
 	for _, feed := range feeds {
@@ -100,19 +100,16 @@ func scrapeFeeds(s *state) error {
 
 	nextFeed, err := s.db.GetNextFeedToFetch(ctx)
 	if err != nil {
-		fmt.Println("error getting next feed to fetch:", err)
-		os.Exit(1)
+		return fmt.Errorf("error getting next feed to fetch: %w", err)
 	}
 
 	if err = s.db.MarkFeedFetched(ctx, nextFeed.ID); err != nil {
-		fmt.Println("error marking feed as fetched:", err)
-		os.Exit(1)
+		return fmt.Errorf("error marking feed as fetched: %w", err)
 	}
 
 	feed, err := fetch.FetchFeed(ctx, nextFeed.Url)
 	if err != nil {
-		fmt.Println("error fetching feed:", err)
-		os.Exit(1)
+		return fmt.Errorf("error fetching feed: %w", err)
 	}
 
 	fmt.Printf("Feed: %s\n", feed.Channel.Title)

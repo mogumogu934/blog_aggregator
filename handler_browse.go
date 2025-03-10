@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -30,8 +29,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 	if len(cmd.args) > 0 {
 		postLimitInt64, err := strconv.ParseInt(cmd.args[0], 10, 32) // Convert string argument to int. ParseInt always returns int64.
 		if err != nil {
-			fmt.Println("error parsing limit string argument to int64:", err)
-			os.Exit(1)
+			return fmt.Errorf("error parsing limit argument %s to int64: %w", cmd.args[0], err)
 		}
 
 		postLimit = int32(postLimitInt64)
